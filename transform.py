@@ -168,6 +168,8 @@ df.loc[(df['V4_1'] == '') & pd.isnull(df['Data Marking']), 'Data Marking'] = dat
 df.to_csv(output_file, index=False)
 SparsityFiller(output_file, data_marker_missing_weeks)
 
+from api_pipeline import Upload_Data_To_Florence
+
 print('Uploading {} to CMD'.format(output_file.split('/')[-1]))
 credentials = 'florence-details.json'
 Upload_Data_To_Florence(credentials, 'faster-indicators-shipping-data', output_file)
