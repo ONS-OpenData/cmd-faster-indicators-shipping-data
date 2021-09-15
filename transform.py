@@ -1,28 +1,23 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun  3 09:23:13 2020
-
-@author: Jim
-"""
-
 from databaker.framework import *
 from databakerUtils.writers import v4Writer
 import pandas as pd
 import glob
-from databakerUtils.sparsityFunctions import SparsityFiller
-from databakerUtils.v4Functions import v4Integers
+from databakerUtils.sparsityFunctions import SparsityFiller ##
+from databakerUtils.v4Functions import v4Integers ##
 from datetime import datetime, timedelta
+from api_pipeline import Multi_Upload_To_Cmd ##
 
-location = '*.xlsx'
-file = glob.glob(location)[0]
-output_file = 'v4-shipping-data.csv'
+# file paths that may need to be changed
+location = 'inputs/shipping-indicators/*.xlsx' # path to source data
+output = 'D:/' # output file saved here
+credentials = 'florence-details.json' # path to login details
+metadata_file = 'inputs/shipping-indicators/faster-indicators-shipping-data-time-series-v33.csv-metadata.json' # path to metadata file
+
+file = glob.glob(location)
+assert len(file) == 1, 'More than one input file located'
+file = file[0]
+
+output_file = output + 'v4-shipping-data.csv'
 
 tabs = loadxlstabs(file)
 tabs = [tab for tab in tabs if 'weekly' in tab.name.lower()]
@@ -30,7 +25,8 @@ tabs = [tab for tab in tabs if 'weekly' in tab.name.lower()]
 data_marker_missing_weeks = '..'
 data_marker_missing_data = '..'
 
-'''Fucntions'''
+'''Functions'''
+
 def WeekNumberLabels(value):
     number = value.split('-')[-1]
     as_int = int(number)
@@ -132,7 +128,7 @@ data['week_number'] = data['week_number'].apply(WeekCorrector)
 
 data = data.drop(['month'], axis=1)
 data['TIMEUNIT'] = data['TIME']
-df = v4Writer('file-path', data, asFrame=True)
+df = v4Writer('file-path', data, asFrame = True)
 
 '''Post Processing'''
 df['V4_1'] = df['V4_1'].apply(v4Integers)
@@ -168,8 +164,19 @@ df.loc[(df['V4_1'] == '') & pd.isnull(df['Data Marking']), 'Data Marking'] = dat
 df.to_csv(output_file, index=False)
 SparsityFiller(output_file, data_marker_missing_weeks)
 
-from api_pipeline import Upload_Data_To_Florence
-
 print('Uploading {} to CMD'.format(output_file.split('/')[-1]))
-credentials = 'florence-details.json'
-Upload_Data_To_Florence(credentials, 'faster-indicators-shipping-data', output_file)
+# variables for upload
+dataset_id = 'faster-indicators-shipping-data'
+edition = 'time-series'
+collection_name = 'CMD shipping indicators'
+
+upload_dict = {
+    dataset_id:{
+        'v4':output_file,
+        'edition':edition,
+        'collection_name':collection_name,
+        'metadata_file':metadata_file
+        }
+}
+    
+Multi_Upload_To_Cmd(credentials, upload_dict)
