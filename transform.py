@@ -11,7 +11,7 @@ from api_pipeline import Multi_Upload_To_Cmd ##
 location = 'inputs/shipping-indicators/*.xlsx' # path to source data
 output = 'D:/' # output file saved here
 credentials = 'florence-details.json' # path to login details
-metadata_file = 'inputs/shipping-indicators/faster-indicators-shipping-data-time-series-v33.csv-metadata.json' # path to metadata file
+metadata_file = 'inputs/shipping-indicators/faster-indicators-shipping-data-time-series-v39.csv-metadata.json' # path to metadata file
 
 file = glob.glob(location)
 assert len(file) == 1, 'More than one input file located'
