@@ -167,11 +167,12 @@ def WeekCorrector(value):
 
 # Run transform
 if __name__ == '__main__':
-    print('Uploading {} to CMD'.format(output_file.split('/')[-1]))
     # variables for upload
     dataset_id = 'faster-indicators-shipping-data'
     edition = 'time-series'
     collection_name = 'CMD shipping indicators'
+    
+    print(f"Uploading {dataset_id} to CMD")
 
     upload_dict = {
         dataset_id:{
